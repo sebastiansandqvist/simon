@@ -19,7 +19,9 @@ const app = blixt({
 		audio
 	},
 	onUpdate(appState, actionName) {
-		console.log('Action: ' + actionName);
+		if (process.env.NODE_ENV === 'production') {
+			console.log('Action: ' + actionName);
+		}
 		batch(render)();
 	}
 });
