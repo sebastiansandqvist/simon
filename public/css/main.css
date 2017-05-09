@@ -34,7 +34,7 @@ h1 {
 	margin: 10px;
 	line-height: 200px;
 	text-align: center;
-	transition: background .2s ease;
+	transition: background .125s ease;
 	user-select: none;
 	width: 200px;
 }
