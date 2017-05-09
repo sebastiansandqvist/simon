@@ -1,0 +1,115 @@
+body {
+	background: #2c3e50;
+	color: #fff;
+	margin: 0;
+	font-family: monospace;
+	padding: 20px;
+}
+
+.Game {
+	background: #34495e;
+	margin: 20px auto;
+	padding: 10px;
+	width: 440px;
+}
+
+h1 {
+	font-size: 18px;
+	margin: 0;
+	padding: 20px 10px;
+}
+
+.left { float: left; }
+
+.right { float: right; }
+
+.Colors {
+}
+
+.Color {
+	cursor: pointer;
+	display: inline-block;
+	font-size: 18px;
+	height: 200px;
+	margin: 10px;
+	line-height: 200px;
+	text-align: center;
+	transition: background .2s ease;
+	user-select: none;
+	width: 200px;
+}
+
+.Color.a {
+	background: #16a085;
+}
+
+.Color.a.active,
+.Color.a:hover {
+	background: #1abc9c;
+}
+
+.Color.a.disabled:hover,
+.Color.a:focus,
+.Color.a:active {
+	background: #16a085;
+}
+
+.Color.b {
+	background: #2980b9;
+}
+
+.Color.b.active,
+.Color.b:hover {
+	background: #3498db;
+}
+
+.Color.b.disabled:hover,
+.Color.b:focus,
+.Color.b:active {
+	background: #2980b9;
+}
+
+.Color.c {
+	background: #c0392b;
+}
+
+.Color.c.active,
+.Color.c:hover {
+	background: #e74c3c;
+}
+
+.Color.c.disabled:hover,
+.Color.c:focus,
+.Color.c:active {
+	background: #c0392b;
+}
+
+.Color.d {
+	background: #8e44ad;
+}
+
+.Color.d.active,
+.Color.d:hover {
+	background: #9b59b6;
+}
+
+.Color.d.disabled:hover,
+.Color.d:focus,
+.Color.d:active {
+	background: #8e44ad;
+}
+
+.Color.disabled {
+	cursor: default;
+	pointer-events: none;
+}
+
+.GameOver {
+	background: #c0392b;
+	box-sizing: border-box;
+	color: #ecf0f1;
+	font-size: 18px;
+	margin: 10px;
+	padding: 20px;
+	text-align: center;
+}
