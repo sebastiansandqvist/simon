@@ -1,3 +1,13 @@
+function initAudio() {
+	const ctx = new AudioContext();
+	const gainNode = ctx.createGain();
+	gainNode.gain.value = 0.0001;
+	return {
+		ctx,
+		gainNode
+	};
+}
+
 export default function gameFactory() {
 	return {
 		colors: ['a', 'b', 'c', 'd'],
@@ -7,6 +17,7 @@ export default function gameFactory() {
 		history: [],
 		playerHistory: [],
 		gameOver: false,
-		isDisabled: true
+		isDisabled: true,
+		audio: initAudio()
 	};
 }

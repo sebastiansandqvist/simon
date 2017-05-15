@@ -1,7 +1,14 @@
-import app from '../../app.js';
 import blixt from 'blixt';
 import * as K from '../../shared/const.js';
 import T from 'blixt/types';
+
+function audioContextType(x) {
+	return x instanceof AudioContext;
+}
+
+function gainNodeType(x) {
+	return x instanceof GainNode;
+}
 
 const gameType = T({
 	colors: T.arrayOf(T.string),
@@ -11,7 +18,11 @@ const gameType = T({
 	history: T.arrayOf(T.string),
 	playerHistory: T.arrayOf(T.string),
 	gameOver: T.bool,
-	isDisabled: T.bool
+	isDisabled: T.bool,
+	audio: T.schema({
+		ctx: audioContextType,
+		gainNode: gainNodeType
+	})
 }, 'Game');
 
 function randomChoice(arr) {
@@ -24,6 +35,16 @@ const keyMap = {
 	51: 'c',
 	52: 'd'
 };
+
+const freqMap = {
+	a: 392,
+	b: 523.25,
+	c: 659.25,
+	d: 783.99
+};
+
+const RAMP_DOWN_TIME = 0.01;
+
 
 function onKeyOnce(fn) {
 	let lastFired = null;
@@ -53,7 +74,7 @@ export default blixt.actions({
 	playLevel({ state, actions }, index = 0) {
 		if (index < state.history.length) {
 			state.activeChoice = state.history[index];
-			app.audio.playSound(state.activeChoice);
+			actions.playSound(state.activeChoice);
 			setTimeout(function() {
 				state.activeChoice = null;
 				blixt.update('Set active to null');
@@ -89,7 +110,7 @@ export default blixt.actions({
 	activateSquare({ state, actions }, key) {
 		const index = state.playerHistory.length;
 		state.playerHistory.push(key);
-		app.audio.playSound(key);
+		actions.playSound(key);
 		state.activeChoice = key;
 		setTimeout(function() {
 			state.activeChoice = null;
@@ -109,5 +130,24 @@ export default blixt.actions({
 				actions.levelUp();
 			}
 		}
+	},
+	playSound({ state }, color) {
+		const audio = state.audio;
+		const osc = audio.ctx.createOscillator();
+		osc.connect(audio.gainNode);
+		osc.type = 'sine';
+		osc.frequency.value = freqMap[color];
+		audio.gainNode.connect(audio.ctx.destination);
+		osc.start();
+		audio.gainNode.gain.setValueAtTime(0.4, audio.ctx.currentTime);
+		setTimeout(function() {
+			audio.gainNode.gain.setValueAtTime(audio.gainNode.gain.value, audio.ctx.currentTime);
+			audio.gainNode.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + RAMP_DOWN_TIME);
+			setTimeout(function() {
+				audio.gainNode.disconnect();
+				osc.stop(audio.ctx.currentTime);
+			}, RAMP_DOWN_TIME * 1000);
+		}, K.ACTIVE_TIME - RAMP_DOWN_TIME * 1000);
 	}
+
 }, gameType);
