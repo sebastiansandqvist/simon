@@ -1559,61 +1559,13 @@ var BETWEEN_TIME = 100;
 var GAME_STARTUP_TIME = 400;
 var LEVEL_STARTUP_TIME = 750;
 
-var audioType = index$4({
-	ctx: index$4.any,
-	oscillator: index$4.any,
-	gainNode: index$4.any
-});
-
-var freqMap = {
-	a: 392,
-	b: 523.25,
-	c: 659.25,
-	d: 783.99
-};
-
-var RAMP_DOWN_TIME = 0.01;
-
-var audioActions = actions({
-	playSound: function playSound(ref, color) {
-		var state = ref.state;
-
-		var osc = state.ctx.createOscillator();
-		osc.connect(state.gainNode);
-		osc.type = 'sine';
-		osc.frequency.value = freqMap[color];
-		state.gainNode.connect(state.ctx.destination);
-		osc.start();
-		state.gainNode.gain.setValueAtTime(0.4, state.ctx.currentTime);
-		setTimeout(function() {
-			state.gainNode.gain.setValueAtTime(state.gainNode.gain.value, state.ctx.currentTime);
-			state.gainNode.gain.exponentialRampToValueAtTime(0.0001, state.ctx.currentTime + RAMP_DOWN_TIME);
-			setTimeout(function() {
-				state.gainNode.disconnect();
-				osc.stop(state.ctx.currentTime);
-			}, RAMP_DOWN_TIME * 1000);
-		}, ACTIVE_TIME - RAMP_DOWN_TIME * 1000);
-	}
-}, audioType);
-
-function audioFactory(defaultFrequency) {
-	if ( defaultFrequency === void 0 ) defaultFrequency = 850;
-
-	var ctx = new AudioContext();
-	var gainNode = ctx.createGain();
-	gainNode.gain.value = 0.0001;
-	return {
-		ctx: ctx,
-		gainNode: gainNode
-	};
+function audioContextType(x) {
+	return x instanceof AudioContext;
 }
 
-var audioState = audioFactory();
-
-var audio = {
-	state: audioState,
-	actions: audioActions.bindTo(audioState)
-};
+function gainNodeType(x) {
+	return x instanceof GainNode;
+}
 
 var gameType = index$4({
 	colors: index$4.arrayOf(index$4.string),
@@ -1623,7 +1575,11 @@ var gameType = index$4({
 	history: index$4.arrayOf(index$4.string),
 	playerHistory: index$4.arrayOf(index$4.string),
 	gameOver: index$4.bool,
-	isDisabled: index$4.bool
+	isDisabled: index$4.bool,
+	audio: index$4.schema({
+		ctx: audioContextType,
+		gainNode: gainNodeType
+	})
 }, 'Game');
 
 function randomChoice(arr) {
@@ -1636,6 +1592,16 @@ var keyMap = {
 	51: 'c',
 	52: 'd'
 };
+
+var freqMap = {
+	a: 392,
+	b: 523.25,
+	c: 659.25,
+	d: 783.99
+};
+
+var RAMP_DOWN_TIME = 0.01;
+
 
 function onKeyOnce(fn) {
 	var lastFired = null;
@@ -1672,7 +1638,7 @@ var gameActions = blixt.actions({
 
 		if (index < state.history.length) {
 			state.activeChoice = state.history[index];
-			app$1.audio.playSound(state.activeChoice);
+			actions$$1.playSound(state.activeChoice);
 			setTimeout(function() {
 				state.activeChoice = null;
 				blixt.update('Set active to null');
@@ -1719,7 +1685,7 @@ var gameActions = blixt.actions({
 
 		var index = state.playerHistory.length;
 		state.playerHistory.push(key);
-		app$1.audio.playSound(key);
+		actions$$1.playSound(key);
 		state.activeChoice = key;
 		setTimeout(function() {
 			state.activeChoice = null;
@@ -1739,8 +1705,39 @@ var gameActions = blixt.actions({
 				actions$$1.levelUp();
 			}
 		}
+	},
+	playSound: function playSound(ref, color) {
+		var state = ref.state;
+
+		var audio = state.audio;
+		var osc = audio.ctx.createOscillator();
+		osc.connect(audio.gainNode);
+		osc.type = 'sine';
+		osc.frequency.value = freqMap[color];
+		audio.gainNode.connect(audio.ctx.destination);
+		osc.start();
+		audio.gainNode.gain.setValueAtTime(0.4, audio.ctx.currentTime);
+		setTimeout(function() {
+			audio.gainNode.gain.setValueAtTime(audio.gainNode.gain.value, audio.ctx.currentTime);
+			audio.gainNode.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + RAMP_DOWN_TIME);
+			setTimeout(function() {
+				audio.gainNode.disconnect();
+				osc.stop(audio.ctx.currentTime);
+			}, RAMP_DOWN_TIME * 1000);
+		}, ACTIVE_TIME - RAMP_DOWN_TIME * 1000);
 	}
+
 }, gameType);
+
+function initAudio() {
+	var ctx = new AudioContext();
+	var gainNode = ctx.createGain();
+	gainNode.gain.value = 0.0001;
+	return {
+		ctx: ctx,
+		gainNode: gainNode
+	};
+}
 
 function gameFactory() {
 	return {
@@ -1751,7 +1748,8 @@ function gameFactory() {
 		history: [],
 		playerHistory: [],
 		gameOver: false,
-		isDisabled: true
+		isDisabled: true,
+		audio: initAudio()
 	};
 }
 
@@ -1769,11 +1767,10 @@ var render = function () { return render$1.render(mountNode, hyperscript_1(Game)
 
 var app$1 = blixt({
 	modules: {
-		game: game,
-		audio: audio
+		game: game
 	},
 	onUpdate: function onUpdate(appState, actionName) {
-		if (undefined === 'production') {
+		if (undefined !== 'production') {
 			console.log('Action: ' + actionName);
 		}
 		batch(render)();
