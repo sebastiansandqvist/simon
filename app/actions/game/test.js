@@ -1,7 +1,7 @@
 import blixt from 'blixt';
 import test from 'testesterone';
 import T from 'blixt/types';
-import app from '../../app.js';
+import '../../app.js';
 
 T.throws = true;
 

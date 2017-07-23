@@ -1518,40 +1518,38 @@ var render$2 = function($window) {
 var render$1 = render$2(window);
 
 function Game() {
-	app$1.game.start();
-	var colors = blixt.getState('game', 'colors');
-	return {
-		view: function view() {
-			var state = blixt.getState('game');
-			var score = 'Score: ' + state.score;
-			var highScore = 'High score: ' + state.highScore;
-			var gameOver = state.gameOver ? hyperscript_1('.GameOver', 'Game over', hyperscript_1('button.right', { onclick: app$1.game.start }, 'Play again')) : null;
-			return [
-				hyperscript_1('.Game',
-					hyperscript_1('h1.left', score),
-					hyperscript_1('h1.right', highScore),
-					hyperscript_1('.Colors',
-						colors.map(function(color, i) {
-							var className = [
-								color,
-								color === state.activeChoice ? 'active' : '',
-								state.isDisabled ? 'disabled' : ''
-							].join(' ');
-							return hyperscript_1('.Color', {
-								className: className,
-								onclick: function onclick() {
-									if (!state.isDisabled) {
-										app$1.game.activateSquare(color);
-									}
-								}
-							}, i + 1);
-						})
-					),
-					gameOver
-				)
-			];
-		}
-	};
+  app$1.game.start();
+  var colors = blixt.getState('game', 'colors');
+  return {
+    view: function view() {
+      var state = blixt.getState('game');
+      var score = 'Score: ' + state.score;
+      var highScore = 'High score: ' + state.highScore;
+      var gameOver = state.gameOver ? hyperscript_1('.GameOver', 'Game over', hyperscript_1('button.right', { onclick: app$1.game.start }, 'Play again')) : null;
+      return [
+        hyperscript_1('.Game',
+          hyperscript_1('h1.left', score),
+          hyperscript_1('h1.right', highScore),
+          hyperscript_1('.Colors',
+            colors.map(function(color, i) {
+              var className = [
+                color,
+                color === state.activeChoice ? 'active' : '',
+                state.isDisabled ? 'disabled' : '' ].join(' ');
+              return hyperscript_1('.Color', {
+                className: className,
+                onclick: function onclick() {
+                  if (!state.isDisabled) {
+                    app$1.game.activateSquare(color);
+                  }
+                },
+              }, i + 1);
+            })
+          ),
+          gameOver
+        ) ];
+    },
+  };
 }
 
 var ACTIVE_TIME = 150;
@@ -1560,204 +1558,204 @@ var GAME_STARTUP_TIME = 400;
 var LEVEL_STARTUP_TIME = 750;
 
 function audioContextType(x) {
-	return x instanceof AudioContext;
+  return x instanceof AudioContext;
 }
 
 function gainNodeType(x) {
-	return x instanceof GainNode;
+  return x instanceof GainNode;
 }
 
 var gameType = index$4({
-	colors: index$4.arrayOf(index$4.string),
-	activeChoice: [index$4.string, index$4.NULL],
-	highScore: index$4.int,
-	score: index$4.int,
-	history: index$4.arrayOf(index$4.string),
-	playerHistory: index$4.arrayOf(index$4.string),
-	gameOver: index$4.bool,
-	isDisabled: index$4.bool,
-	audio: index$4.schema({
-		ctx: audioContextType,
-		gainNode: gainNodeType
-	})
+  colors: index$4.arrayOf(index$4.string),
+  activeChoice: [index$4.string, index$4.NULL],
+  highScore: index$4.int,
+  score: index$4.int,
+  history: index$4.arrayOf(index$4.string),
+  playerHistory: index$4.arrayOf(index$4.string),
+  gameOver: index$4.bool,
+  isDisabled: index$4.bool,
+  audio: index$4.schema({
+    ctx: audioContextType,
+    gainNode: gainNodeType,
+  }),
 }, 'Game');
 
 function randomChoice(arr) {
-	return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 var keyMap = {
-	49: 'a',
-	50: 'b',
-	51: 'c',
-	52: 'd'
+  49: 'a',
+  50: 'b',
+  51: 'c',
+  52: 'd',
 };
 
 var freqMap = {
-	a: 392,
-	b: 523.25,
-	c: 659.25,
-	d: 783.99
+  a: 392,
+  b: 523.25,
+  c: 659.25,
+  d: 783.99,
 };
 
 var RAMP_DOWN_TIME = 0.01;
 
 
 function onKeyOnce(fn) {
-	var lastFired = null;
-	window.onkeydown = function(e) {
-		if (lastFired !== e.which) {
-			lastFired = e.which;
-			fn(e);
-		}
-	};
-	window.onkeyup = function(e) {
-		if (e.which === lastFired) {
-			lastFired = null;
-		}
-	};
+  var lastFired = null;
+  window.onkeydown = function(e) {
+    if (lastFired !== e.which) {
+      lastFired = e.which;
+      fn(e);
+    }
+  };
+  window.onkeyup = function(e) {
+    if (e.which === lastFired) {
+      lastFired = null;
+    }
+  };
 }
 
 var gameActions = blixt.actions({
-	start: function start(ref) {
-		var actions$$1 = ref.actions;
-		var state = ref.state;
+  start: function start(ref) {
+    var actions$$1 = ref.actions;
+    var state = ref.state;
 
-		state.gameOver = false;
-		state.score = 0;
-		state.history.length = 0;
-		state.playerHistory.length = 0;
-		state.activeChoice = null;
-		state.isDisabled = true;
-		setTimeout(actions$$1.levelUp, GAME_STARTUP_TIME);
-	},
-	playLevel: function playLevel(ref, index) {
-		var state = ref.state;
-		var actions$$1 = ref.actions;
-		if ( index === void 0 ) index = 0;
+    state.gameOver = false;
+    state.score = 0;
+    state.history.length = 0;
+    state.playerHistory.length = 0;
+    state.activeChoice = null;
+    state.isDisabled = true;
+    setTimeout(actions$$1.levelUp, GAME_STARTUP_TIME);
+  },
+  playLevel: function playLevel(ref, index) {
+    var state = ref.state;
+    var actions$$1 = ref.actions;
+    if ( index === void 0 ) index = 0;
 
-		if (index < state.history.length) {
-			state.activeChoice = state.history[index];
-			actions$$1.playSound(state.activeChoice);
-			setTimeout(function() {
-				state.activeChoice = null;
-				blixt.update('Set active to null');
-				setTimeout(actions$$1.playLevel, BETWEEN_TIME, index + 1);
-			}, ACTIVE_TIME);
-		}
-		else {
-			actions$$1.awaitPlayerAction();
-		}
-	},
-	levelUp: function levelUp(ref) {
-		var actions$$1 = ref.actions;
-		var state = ref.state;
+    if (index < state.history.length) {
+      state.activeChoice = state.history[index];
+      actions$$1.playSound(state.activeChoice);
+      setTimeout(function() {
+        state.activeChoice = null;
+        blixt.update('Set active to null');
+        setTimeout(actions$$1.playLevel, BETWEEN_TIME, index + 1);
+      }, ACTIVE_TIME);
+    }
+    else {
+      actions$$1.awaitPlayerAction();
+    }
+  },
+  levelUp: function levelUp(ref) {
+    var actions$$1 = ref.actions;
+    var state = ref.state;
 
-		state.playerHistory.length = 0;
-		state.history.push(randomChoice(state.colors));
-		state.score = state.history.length - 1;
-		if (state.score > state.highScore) {
-			state.highScore = state.score;
-			localStorage.setItem('highScore', state.highScore);
-		}
-		setTimeout(actions$$1.playLevel, LEVEL_STARTUP_TIME);
-	},
-	awaitPlayerAction: function awaitPlayerAction(ref) {
-		var state = ref.state;
-		var actions$$1 = ref.actions;
+    state.playerHistory.length = 0;
+    state.history.push(randomChoice(state.colors));
+    state.score = state.history.length - 1;
+    if (state.score > state.highScore) {
+      state.highScore = state.score;
+      localStorage.setItem('highScore', state.highScore);
+    }
+    setTimeout(actions$$1.playLevel, LEVEL_STARTUP_TIME);
+  },
+  awaitPlayerAction: function awaitPlayerAction(ref) {
+    var state = ref.state;
+    var actions$$1 = ref.actions;
 
-		state.isDisabled = false;
-		onKeyOnce(function(e) {
-			var key = keyMap[e.which];
-			if (key) {
-				actions$$1.activateSquare(key);
-			}
-		});
-	},
-	gameOver: function gameOver(ref) {
-		var state = ref.state;
+    state.isDisabled = false;
+    onKeyOnce(function(e) {
+      var key = keyMap[e.which];
+      if (key) {
+        actions$$1.activateSquare(key);
+      }
+    });
+  },
+  gameOver: function gameOver(ref) {
+    var state = ref.state;
 
-		state.gameOver = true;
-	},
-	activateSquare: function activateSquare(ref, key) {
-		var state = ref.state;
-		var actions$$1 = ref.actions;
+    state.gameOver = true;
+  },
+  activateSquare: function activateSquare(ref, key) {
+    var state = ref.state;
+    var actions$$1 = ref.actions;
 
-		var index = state.playerHistory.length;
-		state.playerHistory.push(key);
-		actions$$1.playSound(key);
-		state.activeChoice = key;
-		setTimeout(function() {
-			state.activeChoice = null;
-			blixt.update('activateSquare [done]');
-		}, ACTIVE_TIME);
+    var index = state.playerHistory.length;
+    state.playerHistory.push(key);
+    actions$$1.playSound(key);
+    state.activeChoice = key;
+    setTimeout(function() {
+      state.activeChoice = null;
+      blixt.update('activateSquare [done]');
+    }, ACTIVE_TIME);
 
-		if (state.playerHistory[index] !== state.history[index]) {
-			window.onkeydown = null;
-			window.onkeyup = null;
-			actions$$1.gameOver();
-		}
-		if (state.playerHistory.length === state.history.length) {
-			window.onkeydown = null;
-			window.onkeyup = null;
-			if (!state.gameOver) {
-				state.isDisabled = true;
-				actions$$1.levelUp();
-			}
-		}
-	},
-	playSound: function playSound(ref, color) {
-		var state = ref.state;
+    if (state.playerHistory[index] !== state.history[index]) {
+      window.onkeydown = null;
+      window.onkeyup = null;
+      actions$$1.gameOver();
+    }
+    if (state.playerHistory.length === state.history.length) {
+      window.onkeydown = null;
+      window.onkeyup = null;
+      if (!state.gameOver) {
+        state.isDisabled = true;
+        actions$$1.levelUp();
+      }
+    }
+  },
+  playSound: function playSound(ref, color) {
+    var state = ref.state;
 
-		var audio = state.audio;
-		var osc = audio.ctx.createOscillator();
-		osc.connect(audio.gainNode);
-		osc.type = 'sine';
-		osc.frequency.value = freqMap[color];
-		audio.gainNode.connect(audio.ctx.destination);
-		osc.start();
-		audio.gainNode.gain.setValueAtTime(0.4, audio.ctx.currentTime);
-		setTimeout(function() {
-			audio.gainNode.gain.setValueAtTime(audio.gainNode.gain.value, audio.ctx.currentTime);
-			audio.gainNode.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + RAMP_DOWN_TIME);
-			setTimeout(function() {
-				audio.gainNode.disconnect();
-				osc.stop(audio.ctx.currentTime);
-			}, RAMP_DOWN_TIME * 1000);
-		}, ACTIVE_TIME - RAMP_DOWN_TIME * 1000);
-	}
+    var audio = state.audio;
+    var osc = audio.ctx.createOscillator();
+    osc.connect(audio.gainNode);
+    osc.type = 'sine';
+    osc.frequency.value = freqMap[color];
+    audio.gainNode.connect(audio.ctx.destination);
+    osc.start();
+    audio.gainNode.gain.setValueAtTime(0.4, audio.ctx.currentTime);
+    setTimeout(function() {
+      audio.gainNode.gain.setValueAtTime(audio.gainNode.gain.value, audio.ctx.currentTime);
+      audio.gainNode.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + RAMP_DOWN_TIME);
+      setTimeout(function() {
+        audio.gainNode.disconnect();
+        osc.stop(audio.ctx.currentTime);
+      }, RAMP_DOWN_TIME * 1000);
+    }, ACTIVE_TIME - RAMP_DOWN_TIME * 1000);
+  },
 
 }, gameType);
 
 function initAudio() {
-	var ctx = new AudioContext();
-	var gainNode = ctx.createGain();
-	gainNode.gain.value = 0.0001;
-	return {
-		ctx: ctx,
-		gainNode: gainNode
-	};
+  var ctx = new AudioContext();
+  var gainNode = ctx.createGain();
+  gainNode.gain.value = 0.0001;
+  return {
+    ctx: ctx,
+    gainNode: gainNode,
+  };
 }
 
 function gameFactory() {
-	return {
-		colors: ['a', 'b', 'c', 'd'],
-		activeChoice: null,
-		highScore: parseInt(localStorage.getItem('highScore'), 10) || 0,
-		score: 0,
-		history: [],
-		playerHistory: [],
-		gameOver: false,
-		isDisabled: true,
-		audio: initAudio()
-	};
+  return {
+    colors: ['a', 'b', 'c', 'd'],
+    activeChoice: null,
+    highScore: parseInt(localStorage.getItem('highScore'), 10) || 0,
+    score: 0,
+    history: [],
+    playerHistory: [],
+    gameOver: false,
+    isDisabled: true,
+    audio: initAudio(),
+  };
 }
 
 var gameState = gameFactory();
 
 var game = {
-	state: gameState,
-	actions: gameActions.bindTo(gameState)
+  state: gameState,
+  actions: gameActions.bindTo(gameState),
 };
 
 index$4.disabled = undefined === 'production';
@@ -1766,15 +1764,15 @@ var mountNode = document.getElementById('app');
 var render = function () { return render$1.render(mountNode, hyperscript_1(Game)); };
 
 var app$1 = blixt({
-	modules: {
-		game: game
-	},
-	onUpdate: function onUpdate(appState, actionName) {
-		if (undefined !== 'production') {
-			console.log('Action: ' + actionName);
-		}
-		batch(render)();
-	}
+  modules: {
+    game: game,
+  },
+  onUpdate: function onUpdate(appState, actionName) {
+    if (undefined !== 'production') {
+      console.log('Action: ' + actionName);
+    }
+    batch(render)();
+  },
 });
 
 render();
@@ -1783,14 +1781,14 @@ index$4.throws = true;
 
 index$1('game', function(it) {
 
-	it('initializes game', function(expect) {
-		expect(blixt.getState('game', 'activeChoice')).to.equal(null);
-		expect(blixt.getState('game', 'score')).to.equal(0);
-		expect(blixt.getState('game', 'history')).to.deep.equal([]);
-		expect(blixt.getState('game', 'playerHistory')).to.deep.equal([]);
-		expect(blixt.getState('game', 'gameOver')).to.equal(false);
-		expect(blixt.getState('game', 'isDisabled')).to.equal(true);
-	});
+  it('initializes game', function(expect) {
+    expect(blixt.getState('game', 'activeChoice')).to.equal(null);
+    expect(blixt.getState('game', 'score')).to.equal(0);
+    expect(blixt.getState('game', 'history')).to.deep.equal([]);
+    expect(blixt.getState('game', 'playerHistory')).to.deep.equal([]);
+    expect(blixt.getState('game', 'gameOver')).to.equal(false);
+    expect(blixt.getState('game', 'isDisabled')).to.equal(true);
+  });
 
 })();
 
