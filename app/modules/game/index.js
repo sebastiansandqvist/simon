@@ -4,6 +4,6 @@ import gameFactory from '../../factories/game';
 const gameState = gameFactory();
 
 export default {
-	state: gameState,
-	actions: gameActions.bindTo(gameState)
+  state: gameState,
+  actions: gameActions.bindTo(gameState),
 };

@@ -13,15 +13,15 @@ const mountNode = document.getElementById('app');
 const render = () => m.render(mountNode, h(Game));
 
 const app = blixt({
-	modules: {
-		game
-	},
-	onUpdate(appState, actionName) {
-		if (process.env.NODE_ENV !== 'production') {
-			console.log('Action: ' + actionName);
-		}
-		batch(render)();
-	}
+  modules: {
+    game,
+  },
+  onUpdate(appState, actionName) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Action: ' + actionName);
+    }
+    batch(render)();
+  },
 });
 
 render();
